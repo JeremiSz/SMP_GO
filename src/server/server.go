@@ -7,7 +7,7 @@ import (
 	"net"
 )
 
-func run() {
+func Run() {
 	var socket = makeListener()
 	defer socket.Close()
 	log.Println("Listening on port 8080")
