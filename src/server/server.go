@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 )
 
 func Run() {
@@ -13,6 +14,7 @@ func Run() {
 	log.Println("Listening on port 8080")
 	for {
 		var conn, err = socket.Accept()
+		log.Println("New connection")
 		if err != nil {
 			log.Println(err)
 			continue
@@ -22,7 +24,7 @@ func Run() {
 }
 
 func makeListener() net.Listener {
-	var socket, err = net.Listen("tcp", ":8080")
+	var socket, err = net.Listen("tcp4", ":8080")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,7 +34,9 @@ func makeListener() net.Listener {
 func handleConnection(connection net.Conn) {
 	var buffer = bufio.NewReader(connection)
 	var writer = bufio.NewWriter(connection)
+	log.Println("Waiting for request")
 	var request, err = recieveMessage(buffer)
+	log.Println("Recieved request")
 	if err != nil {
 		log.Println(err)
 		return
@@ -46,13 +50,16 @@ func handleConnection(connection net.Conn) {
 	sendMessage(writer, createSuccessfulLogin())
 	for {
 		var request_data, err = recieveMessage(buffer)
+		log.Println("Recieved command" + request_data)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		var request = parse(request_data)
-		switch request[command] {
+		var command = strings.ReplaceAll(request[command], "\n", "")
+		switch command {
 		case commandRead:
+			log.Println("Reading a")
 			_ = read(request, writer)
 		case commandWrite:
 			_ = write(request, writer, username)
@@ -62,6 +69,7 @@ func handleConnection(connection net.Conn) {
 				return
 			}
 		default:
+			log.Println("Unknown command")
 			continue
 		}
 	}
@@ -77,13 +85,20 @@ func checkValidLogin(loginData map[string]string) (string, error) {
 }
 
 func read(request map[string]string, writer *bufio.Writer) error {
-	if len(request) > 1 {
-		var _, _ = writer.WriteString(createError(3003))
-		return nil
+	log.Println("Reading")
+	var condition = len(request) > 1
+	log.Println("Checked condition")
+	if condition {
+		log.Println("Sending error")
+		var err = sendMessage(writer, createError(4003))
+		return err
 	}
+	log.Println("Getting authors and texts")
 	var authors = getAuthros()
 	var texts = getTexts()
+	log.Println("Creating successful read response")
 	var response, err = createSuccessfulRead(authors, texts)
+	log.Println("Sending successful read response")
 	if err != nil {
 		return err
 	}
@@ -97,7 +112,8 @@ func write(request map[string]string, writer *bufio.Writer, username string) err
 		return err
 	}
 	addMessage(username, text)
-	return nil
+	var err = sendMessage(writer, createSuccessfulWrite())
+	return err
 }
 
 func logout(request map[string]string, writer *bufio.Writer) error {

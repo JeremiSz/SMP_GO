@@ -6,7 +6,6 @@ import (
 )
 
 const command = "command"
-const loginUsername = "username"
 const attrText = "text"
 const commandLogin = "login"
 const commandRead = "read"
@@ -66,7 +65,7 @@ func createSuccessfulWrite() string {
 }
 func createSuccessfulRead(authors []string, texts []string) (string, error) {
 	var sb strings.Builder
-	var opening = fmt.Sprintf("command:read,code:3001,authors")
+	var opening = "command:read,code:3001,authors"
 	var _, err = sb.WriteString(opening)
 	if err != nil {
 		return "", err

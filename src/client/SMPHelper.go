@@ -55,6 +55,9 @@ func parse(message string) map[string]string {
 	var pairs = strings.Split(message, ",")
 	for _, pair := range pairs {
 		var index = strings.Index(pair, ":")
+		if index == -1 {
+			continue
+		}
 		var key = pair[:index]
 		var value = pair[index+1:]
 		result[key] = value
@@ -63,5 +66,5 @@ func parse(message string) map[string]string {
 }
 
 func extractArray(value string) []string {
-	return strings.Split(value, ";")
+	return strings.Split(value, ":")
 }

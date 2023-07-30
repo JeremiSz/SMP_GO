@@ -29,7 +29,7 @@ func write(connection net.Conn, message string) (
 	var text = strings.ReplaceAll(message, ":", "")
 	text = strings.ReplaceAll(text, ",", "")
 	text = strings.ReplaceAll(text, "\n", "")
-	var response, err = send_message(connection, text)
+	var response, err = send_message(connection, createWrite(text))
 	if err != nil {
 		log_error(err)
 	}

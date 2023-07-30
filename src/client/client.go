@@ -1,6 +1,7 @@
 package client
 
 import (
+	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -85,6 +86,8 @@ func read_visual(connection net.Conn) {
 	} else {
 		size = uint(len(texts))
 	}
+	log.Printf("%v %v", authors, texts)
+	log.Println(authors[0])
 	for i := uint(0); i < size; i++ {
 		log_message(authors[i] + ": " + texts[i])
 	}
